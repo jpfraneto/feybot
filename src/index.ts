@@ -10,6 +10,7 @@ import {
   mevModuleUpdates,
   configUpdates,
 } from "../ponder.schema";
+import { deploymentTracker } from "./api/utils/deployment-tracker.js";
 
 const sendTokenToBackend = async (tokenData: any) => {
   try {
@@ -68,6 +69,42 @@ ponder.on("Fey:TokenCreated", async ({ event, context }) => {
 
   const tokenId = `${transaction.hash}-${event.log.logIndex}`;
 
+  // Check for matching deployment from our UI
+  const matchedDeployment = deploymentTracker.matchDeployment({
+    tokenName,
+    tokenSymbol,
+    msgSender: msgSender.toLowerCase(),
+    transactionHash: transaction.hash,
+    tokenAddress: tokenAddress.toLowerCase()
+  });
+
+  // Determine UI tracking values
+  let createdViaUI: string | null = null;
+  let uiCastHash: string | null = null;
+  let deploymentType: string | null = null;
+
+  if (matchedDeployment) {
+    createdViaUI = 'feybot';
+    uiCastHash = matchedDeployment.castHash;
+    deploymentType = matchedDeployment.deploymentType;
+    
+    console.log(`[TokenCreated] ✅ Token matched to UI deployment:`, {
+      tokenName,
+      tokenSymbol,
+      deploymentType: matchedDeployment.deploymentType,
+      castHash: matchedDeployment.castHash
+    });
+  } else {
+    createdViaUI = 'external';
+    deploymentType = 'external';
+    
+    console.log(`[TokenCreated] ℹ️ Token created externally:`, {
+      tokenName,
+      tokenSymbol,
+      msgSender: msgSender.toLowerCase()
+    });
+  }
+
   await context.db.insert(tokenCreations).values({
     id: tokenId,
     msgSender: msgSender.toLowerCase(),
@@ -89,6 +126,9 @@ ponder.on("Fey:TokenCreated", async ({ event, context }) => {
     blockNumber: block.number,
     transactionHash: transaction.hash,
     timestamp: block.timestamp,
+    createdViaUI,
+    uiCastHash,
+    deploymentType,
   });
 
   const tokenData = {
@@ -112,6 +152,19 @@ ponder.on("Fey:TokenCreated", async ({ event, context }) => {
     blockNumber: block.number.toString(),
     transactionHash: transaction.hash,
     timestamp: block.timestamp.toString(),
+    createdViaUI,
+    uiCastHash,
+    deploymentType,
+    // Include additional tracking data if matched
+    ...(matchedDeployment && {
+      feyBotDeploymentData: {
+        castHash: matchedDeployment.castHash,
+        deploymentType: matchedDeployment.deploymentType,
+        feePercentage: matchedDeployment.feePercentage,
+        communityContributionCap: matchedDeployment.communityContributionCap,
+        teamContributionCap: matchedDeployment.teamContributionCap
+      }
+    })
   };
 
   await sendTokenToBackend(tokenData);

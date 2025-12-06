@@ -22,6 +22,9 @@ export const tokenCreations = onchainTable("token_creations", (t) => ({
   blockNumber: t.bigint().notNull(),
   transactionHash: t.text().notNull(),
   timestamp: t.bigint().notNull(),
+  createdViaUI: t.text(), // 'feybot', 'tgc', 'external', null
+  uiCastHash: t.text(), // Hash of the cast that initiated this deployment (if applicable)
+  deploymentType: t.text(), // 'tgc', 'fey_token', 'external', null
 }));
 
 export const extensionTriggers = onchainTable("extension_triggers", (t) => ({

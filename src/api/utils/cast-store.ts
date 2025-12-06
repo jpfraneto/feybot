@@ -17,6 +17,8 @@ interface StoredCastData {
   };
   timestamp: string;
   tgcParams?: any;
+  feyTokenParams?: any;
+  intentType?: 'tgc' | 'fey_token' | 'none';
   createdAt: Date;
 }
 
@@ -64,6 +66,34 @@ class CastStore {
     }
 
     data.tgcParams = tgcParams;
+    data.intentType = 'tgc';
+    this.store.set(castHash, data);
+    return true;
+  }
+
+  // Update FEY token parameters for a stored cast
+  updateFeyTokenParams(castHash: string, feyTokenParams: any): boolean {
+    const data = this.store.get(castHash);
+    
+    if (!data) {
+      return false;
+    }
+
+    data.feyTokenParams = feyTokenParams;
+    data.intentType = 'fey_token';
+    this.store.set(castHash, data);
+    return true;
+  }
+
+  // Update intent type for a stored cast
+  updateIntentType(castHash: string, intentType: 'tgc' | 'fey_token' | 'none'): boolean {
+    const data = this.store.get(castHash);
+    
+    if (!data) {
+      return false;
+    }
+
+    data.intentType = intentType;
     this.store.set(castHash, data);
     return true;
   }

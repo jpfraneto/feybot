@@ -12,6 +12,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.1",
     "@hono/node-server": "^1.19.6",
     "@wagmi/connectors": "^7.0.2",
     "@wagmi/core": "^3.0.0",

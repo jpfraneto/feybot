@@ -1,5 +1,5 @@
 // Main TGC Launch Miniapp View
-import { getFeybotSVG, getSVGStyles } from '../components/feybot-svg.js';
+import { getFeybotSVG, getSVGStyles } from "../components/feybot-svg.js";
 
 export function getMainTGCLaunchView(): string {
   return `
@@ -9,9 +9,12 @@ export function getMainTGCLaunchView(): string {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Feybot - Token Generation Ceremony</title>
-        <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://feybot.orbiter.website/og-image.png","button":{"title":"Launch TGC","action":{"type":"launch_miniapp","name":"Feybot TGC","url":"${process.env.BASE_URL || 'https://feybot.orbiter.website'}","splashImageUrl":"https://feybot.orbiter.website/splash.png","splashBackgroundColor":"#0C6300"}}}' />
+        <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://fresh.anky.app/static/og-image.svg","button":{"title":"Launch TGC","action":{"type":"launch_miniapp","name":"Feybot TGC","url":"${
+          process.env.BASE_URL || "https://fresh.anky.app"
+        }","splashImageUrl":"https://fresh.anky.app/static/icon.svg","splashBackgroundColor":"#0C6300"}}}' />
         <script src="https://unpkg.com/htmx.org@1.9.10"></script>
         <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+        <script type="module" src="https://esm.sh/@farcaster/miniapp-sdk"></script>
         
         ${getSVGStyles()}
         
@@ -185,14 +188,14 @@ export function getMainTGCLaunchView(): string {
     <body>
         <!-- Background Video -->
         <video autoplay muted loop class="video-background" id="background-video">
-            <source src="https://feybot.orbiter.website/background.mp4" type="video/mp4">
-            <source src="https://feybot.orbiter.website/background.webm" type="video/webm">
+            <source src="https://fresh.anky.app/static/background.mp4" type="video/mp4">
+            <source src="https://fresh.anky.app/static/background.webm" type="video/webm">
         </video>
         
         <!-- Background Audio -->
         <audio autoplay loop class="audio-background" id="background-audio">
-            <source src="https://feybot.orbiter.website/ambient.mp3" type="audio/mpeg">
-            <source src="https://feybot.orbiter.website/ambient.ogg" type="audio/ogg">
+            <source src="https://fresh.anky.app/static/ambient.mp3" type="audio/mpeg">
+            <source src="https://fresh.anky.app/static/ambient.ogg" type="audio/ogg">
         </audio>
         
         <!-- Fractal Background -->
@@ -216,13 +219,7 @@ export function getMainTGCLaunchView(): string {
                 Experience the future of token launches.
             </p>
             
-            <button class="start-tgc-button" 
-                    hx-get="/api/tgc/start-interface"
-                    hx-target="#main-app"
-                    hx-swap="outerHTML"
-                    _="on click 
-                       add .loading to me 
-                       set my innerHTML to 'LAUNCHING...'">
+            <button class="start-tgc-button" id="start-tgc-button">
                 START TGC
             </button>
         </div>
@@ -235,7 +232,10 @@ export function getMainTGCLaunchView(): string {
                 const splashContainer = document.getElementById('splash-container');
                 const splash = document.createElement('div');
                 splash.className = 'fractal-splash';
-                splash.innerHTML = \`${getFeybotSVG(false).replace(/"/g, '\\"')}\`;
+                splash.innerHTML = \`${getFeybotSVG(false).replace(
+                  /"/g,
+                  '\\"'
+                )}\`;
                 splash.style.left = (x - 75) + 'px';
                 splash.style.top = (y - 75) + 'px';
                 splash.style.width = '150px';
@@ -280,6 +280,42 @@ export function getMainTGCLaunchView(): string {
             
             // Add to global scope for hyperscript
             window.createFractalSplash = createFractalSplash;
+        </script>
+        
+        <script type="module">
+            import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk';
+            
+            const startTgcButton = document.getElementById('start-tgc-button');
+            
+            startTgcButton.addEventListener('click', async function() {
+                // Add loading state
+                this.classList.add('loading');
+                this.innerHTML = 'LAUNCHING...';
+                this.disabled = true;
+                
+                try {
+                    // Check if we're in a Farcaster miniapp context
+                    await sdk.actions.ready();
+                    
+                    // We're in a miniapp context, compose a cast
+                    console.log('[TGC] In Farcaster miniapp context, composing cast...');
+                    await sdk.actions.composeCast({
+                        text: "hey @feybot i want to deploy a clanker token via TGC for 100 people where each one of them pays 0.05 eth"
+                    });
+                    console.log('[TGC] ✓ Cast composed successfully');
+                } catch (error) {
+                    // Not in a miniapp context, open the URL
+                    console.log('[TGC] Not in Farcaster miniapp context, opening URL:', error);
+                    window.open('https://farcaster.com/feybot', '_blank');
+                } finally {
+                    // Reset button state after a delay
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                        this.innerHTML = 'START TGC';
+                        this.disabled = false;
+                    }, 1000);
+                }
+            });
         </script>
     </body>
     </html>

@@ -21,7 +21,10 @@ import { getMainTGCLaunchView } from "./views/main-tgc-launch.js";
 import { getTGCReplyMiniappView } from "./views/tgc-reply-miniapp.js";
 import { getFeyTokenDeployMiniappView } from "./views/fey-token-deploy-miniapp.js";
 import { castStore } from "./utils/cast-store.js";
-import { deploymentTracker, type PendingDeployment } from "./utils/deployment-tracker.js";
+import {
+  deploymentTracker,
+  type PendingDeployment,
+} from "./utils/deployment-tracker.js";
 
 const app = new Hono();
 
@@ -182,14 +185,17 @@ async function processFeybotWasTaggedOnACastWebhook(webhookData: any) {
     let embedUrl = "";
     let shouldPublishReply = false;
 
-    if (intentAnalysis.intentType === 'tgc') {
+    if (intentAnalysis.intentType === "tgc") {
       console.log("[Feybot] TGC intent detected, generating parameters...");
 
       // Check media validity for TGC
       if (!castData.media.isValid) {
         // Generate personality-infused response about media issue
         response = await generateFeybotResponse(
-          castData.text + "\n\n[CONTEXT: Media validation failed - " + castData.media.error + "]",
+          castData.text +
+            "\n\n[CONTEXT: Media validation failed - " +
+            castData.media.error +
+            "]",
           intentAnalysis,
           castData.author.username
         );
@@ -212,7 +218,8 @@ async function processFeybotWasTaggedOnACastWebhook(webhookData: any) {
           castData.author.username
         );
 
-        response += `\n\n✨ **Ceremonial Configuration Detected:**\n` +
+        response +=
+          `\n\n✨ **Ceremonial Configuration Detected:**\n` +
           `🏛️ Token: ${tgcParams.token.name} (${tgcParams.token.symbol})\n` +
           `💰 Community Cap: ${(
             parseFloat(tgcParams.communityContributionCap) / 1e18
@@ -230,8 +237,10 @@ async function processFeybotWasTaggedOnACastWebhook(webhookData: any) {
 
         console.log("[Feybot] TGC parameters generated:", tgcParams);
       }
-    } else if (intentAnalysis.intentType === 'fey_token') {
-      console.log("[Feybot] FEY Token deployment intent detected, generating parameters...");
+    } else if (intentAnalysis.intentType === "fey_token") {
+      console.log(
+        "[Feybot] FEY Token deployment intent detected, generating parameters..."
+      );
 
       // Generate FEY token parameters from the cast
       const feyTokenParams = await generateFeyTokenParameters(
@@ -242,7 +251,10 @@ async function processFeybotWasTaggedOnACastWebhook(webhookData: any) {
       // Use cast image if available, otherwise use generated placeholder
       if (castData.media.isValid && castData.media.mediaUrl) {
         feyTokenParams.tokenImage = castData.media.mediaUrl;
-        console.log("[Feybot] Using cast image for token:", castData.media.mediaUrl);
+        console.log(
+          "[Feybot] Using cast image for token:",
+          castData.media.mediaUrl
+        );
       }
 
       // Store FEY token parameters with cast data
@@ -255,12 +267,23 @@ async function processFeybotWasTaggedOnACastWebhook(webhookData: any) {
         castData.author.username
       );
 
-      response += `\n\n⚡ **Deployment Essence Channeled:**\n` +
+      response +=
+        `\n\n⚡ **Deployment Essence Channeled:**\n` +
         `🪙 Token: ${feyTokenParams.tokenName} (${feyTokenParams.tokenSymbol})\n` +
         `💎 Feythful Share: ${feyTokenParams.feePercentage}%\n` +
-        `🌊 Initial Liquidity: ${(parseFloat(feyTokenParams.initialLiquidity) / 1e18).toFixed(1)} ETH\n` +
-        `${castData.media.isValid ? `🎨 Sacred Media: ${castData.media.mediaUrl}\n` : `💫 Media: Auto-generated placeholder\n`}\n` +
-        `${!castData.media.isValid ? `\n🌟 *Pro tip: Attach an image to your cast next time for a custom token image!*\n` : ``}\n` +
+        `🌊 Initial Liquidity: ${(
+          parseFloat(feyTokenParams.initialLiquidity) / 1e18
+        ).toFixed(1)} ETH\n` +
+        `${
+          castData.media.isValid
+            ? `🎨 Sacred Media: ${castData.media.mediaUrl}\n`
+            : `💫 Media: Auto-generated placeholder\n`
+        }\n` +
+        `${
+          !castData.media.isValid
+            ? `\n🌟 *Pro tip: Attach an image to your cast next time for a custom token image!*\n`
+            : ``
+        }\n` +
         `🔮 Step through the portal to manifest your token:`;
 
       embedUrl = `${
@@ -292,26 +315,38 @@ async function processFeybotWasTaggedOnACastWebhook(webhookData: any) {
           const token = tokenData[0];
           // Generate personality-infused response for token lookup
           response = await generateFeybotResponse(
-            castData.text + `\n\n[CONTEXT: Found token in FEY protocol database - ${token?.tokenName} (${token?.tokenSymbol})]`,
+            castData.text +
+              `\n\n[CONTEXT: Found token in FEY protocol database - ${token?.tokenName} (${token?.tokenSymbol})]`,
             intentAnalysis,
             castData.author.username
           );
 
-          response += `\n\n🔮 **Token Divination Results:**\n` +
+          response +=
+            `\n\n🔮 **Token Divination Results:**\n` +
             `✨ Token: ${token?.tokenName} (${token?.tokenSymbol})\n` +
-            `🧙‍♂️ Creator: ${token?.msgSender.slice(0, 6)}...${token?.msgSender.slice(-4)}\n` +
+            `🧙‍♂️ Creator: ${token?.msgSender.slice(
+              0,
+              6
+            )}...${token?.msgSender.slice(-4)}\n` +
             `🏊 Pool ID: ${token?.poolId.slice(0, 10)}...\n` +
-            `⚡ Extensions: ${JSON.parse(token?.extensions || "[]").length} active\n` +
-            `${token?.createdViaUI === 'feybot' ? `💫 Summoned via Feybot UI\n` : ``}\n` +
+            `⚡ Extensions: ${
+              JSON.parse(token?.extensions || "[]").length
+            } active\n` +
+            `${
+              token?.createdViaUI === "feybot"
+                ? `💫 Summoned via Feybot UI\n`
+                : ``
+            }\n` +
             `📊 Explore on Base: https://basescan.org/address/${token?.tokenAddress}`;
         } else {
           // Generate personality-infused response for token not found
           response = await generateFeybotResponse(
-            castData.text + "\n\n[CONTEXT: Token address provided but not found in FEY protocol database]",
+            castData.text +
+              "\n\n[CONTEXT: Token address provided but not found in FEY protocol database]",
             intentAnalysis,
             castData.author.username
           );
-          
+
           response += `\n\n🌊 The mystical energies show no trace of this address in our sacred protocol records. Perhaps it dwells in another realm, or the address carries ancient typos?\n\n💫 Ready to manifest your own token through the FEY Protocol? The portals await!`;
         }
         shouldPublishReply = true;
@@ -321,12 +356,14 @@ async function processFeybotWasTaggedOnACastWebhook(webhookData: any) {
       ) {
         // Generate personality-infused response for general token inquiry
         response = await generateFeybotResponse(
-          castData.text + "\n\n[CONTEXT: General inquiry about FEY Protocol or tokens]",
+          castData.text +
+            "\n\n[CONTEXT: General inquiry about FEY Protocol or tokens]",
           intentAnalysis,
           castData.author.username
         );
 
-        response += `\n\n✨ **The FEY Protocol Mysteries:**\n` +
+        response +=
+          `\n\n✨ **The FEY Protocol Mysteries:**\n` +
           `🌿 User-owned launchpad infrastructure on Base\n` +
           `⚡ Uniswap v4 integration with MEV protection\n` +
           `🔮 Custom hooks and extension system\n` +
@@ -337,12 +374,14 @@ async function processFeybotWasTaggedOnACastWebhook(webhookData: any) {
       } else {
         // Generate personality-infused response for general query
         response = await generateFeybotResponse(
-          castData.text + "\n\n[CONTEXT: General greeting or inquiry about Feybot]",
+          castData.text +
+            "\n\n[CONTEXT: General greeting or inquiry about Feybot]",
           intentAnalysis,
           castData.author.username
         );
 
-        response += `\n\n🔮 I am the mystical guardian of the FEY Protocol realm, here to guide you through:\n` +
+        response +=
+          `\n\n🔮 I am the mystical guardian of the FEY Protocol realm, here to guide you through:\n` +
           `✨ Token Generation Ceremonies (TGCs)\n` +
           `⚡ Direct FEY token deployment\n` +
           `💎 User-owned launchpad magic\n` +
@@ -619,7 +658,7 @@ app.post("/api/tgc/generate-transaction", async (c) => {
     // Store pending deployment for tracking
     const pendingDeployment: PendingDeployment = {
       castHash,
-      deploymentType: 'tgc',
+      deploymentType: "tgc",
       expectedTokenName: tgcParams.token.name,
       expectedTokenSymbol: tgcParams.token.symbol,
       expectedCreator: tgcParams.creator,
@@ -627,11 +666,14 @@ app.post("/api/tgc/generate-transaction", async (c) => {
       communityContributionCap: tgcParams.communityContributionCap,
       teamContributionCap: tgcParams.teamContributionCap,
       timestamp: new Date(),
-      matched: false
+      matched: false,
     };
-    
+
     deploymentTracker.storePendingDeployment(pendingDeployment);
-    console.log(`[TGC] Stored pending deployment for tracking:`, pendingDeployment);
+    console.log(
+      `[TGC] Stored pending deployment for tracking:`,
+      pendingDeployment
+    );
 
     return c.html(`
       <div class="transaction-result">
@@ -697,9 +739,17 @@ app.post("/api/fey-token/deploy", async (c) => {
     const feyTokenParams: FeyTokenParameters = {
       tokenName: formData.tokenName as string,
       tokenSymbol: formData.tokenSymbol as string,
-      tokenImage: formData.tokenImage as string || `https://fresh.anky.app/token-image/${(formData.tokenSymbol as string).toLowerCase()}.png`,
-      description: formData.tokenDescription as string || `${formData.tokenName} - A token on the Fey protocol`,
-      initialLiquidity: ((parseFloat(formData.initialLiquidity as string) || 1) * 1e18).toString(),
+      tokenImage:
+        (formData.tokenImage as string) ||
+        `https://fresh.anky.app/token-image/${(
+          formData.tokenSymbol as string
+        ).toLowerCase()}.png`,
+      description:
+        (formData.tokenDescription as string) ||
+        `${formData.tokenName} - A token on the Fey protocol`,
+      initialLiquidity: (
+        (parseFloat(formData.initialLiquidity as string) || 1) * 1e18
+      ).toString(),
       feePercentage: parseInt(formData.feePercentage as string) || 49,
       tickSpacing: parseInt(formData.tickSpacing as string) || 200,
       creator: "0x1234567890123456789012345678901234567890", // This would come from user's wallet
@@ -714,18 +764,21 @@ app.post("/api/fey-token/deploy", async (c) => {
     // Store pending deployment for tracking
     const pendingDeployment: PendingDeployment = {
       castHash,
-      deploymentType: 'fey_token',
+      deploymentType: "fey_token",
       expectedTokenName: feyTokenParams.tokenName,
       expectedTokenSymbol: feyTokenParams.tokenSymbol,
       expectedCreator: feyTokenParams.creator,
       expectedSalt: feyTokenParams.salt,
       feePercentage: feyTokenParams.feePercentage,
       timestamp: new Date(),
-      matched: false
+      matched: false,
     };
-    
+
     deploymentTracker.storePendingDeployment(pendingDeployment);
-    console.log(`[FEY Token] Stored pending deployment for tracking:`, pendingDeployment);
+    console.log(
+      `[FEY Token] Stored pending deployment for tracking:`,
+      pendingDeployment
+    );
 
     return c.html(`
       <div class="transaction-result">
@@ -736,9 +789,15 @@ app.post("/api/fey-token/deploy", async (c) => {
           
           <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(79, 198, 95, 0.1); border-radius: 8px;">
             <h5 style="color: #4FC65F; margin-bottom: 0.5rem;">🎯 Deployment Summary:</h5>
-            <p style="margin: 0.25rem 0;"><strong>Token:</strong> ${feyTokenParams.tokenName} (${feyTokenParams.tokenSymbol})</p>
-            <p style="margin: 0.25rem 0;"><strong>Fee to Feythful:</strong> ${feyTokenParams.feePercentage}%</p>
-            <p style="margin: 0.25rem 0;"><strong>Initial Liquidity:</strong> ${(parseFloat(feyTokenParams.initialLiquidity) / 1e18).toFixed(1)} ETH</p>
+            <p style="margin: 0.25rem 0;"><strong>Token:</strong> ${
+              feyTokenParams.tokenName
+            } (${feyTokenParams.tokenSymbol})</p>
+            <p style="margin: 0.25rem 0;"><strong>Fee to Feythful:</strong> ${
+              feyTokenParams.feePercentage
+            }%</p>
+            <p style="margin: 0.25rem 0;"><strong>Initial Liquidity:</strong> ${(
+              parseFloat(feyTokenParams.initialLiquidity) / 1e18
+            ).toFixed(1)} ETH</p>
           </div>
         </div>
         <div class="action-buttons" style="margin-top: 1.5rem;">
@@ -754,7 +813,9 @@ app.post("/api/fey-token/deploy", async (c) => {
             // This would integrate with FeySDK
             if (typeof window.FeySDK !== 'undefined') {
               // Actual FeySDK deployment would happen here
-              console.log('Deploying with FeySDK:', ${JSON.stringify(feyTokenParams)});
+              console.log('Deploying with FeySDK:', ${JSON.stringify(
+                feyTokenParams
+              )});
               alert('FeySDK deployment initiated! Check console for details.');
             } else {
               alert('FeySDK not loaded. In production, this would deploy your token.');
@@ -789,14 +850,20 @@ app.get("/api/fey-token/preview", async (c) => {
         <p><strong>Fee to Feythful:</strong> ${query.feePercentage}%</p>
         <p><strong>Initial Liquidity:</strong> ${query.initialLiquidity} ETH</p>
         <p><strong>Tick Spacing:</strong> ${query.tickSpacing}</p>
-        <p><strong>Description:</strong> ${query.tokenDescription || 'No description provided'}</p>
+        <p><strong>Description:</strong> ${
+          query.tokenDescription || "No description provided"
+        }</p>
       </div>
       
       <div style="margin-top: 1rem; padding: 1rem; background: rgba(79, 198, 95, 0.05); border-radius: 6px; font-size: 0.8rem; color: #3EA34B;">
         <strong>💡 What this means:</strong><br>
         • Your token will be deployed on the Fey protocol<br>
-        • ${query.feePercentage}% of trading fees will go to token holders (feythful)<br>
-        • Initial liquidity pool will be created with ${query.initialLiquidity} ETH<br>
+        • ${
+          query.feePercentage
+        }% of trading fees will go to token holders (feythful)<br>
+        • Initial liquidity pool will be created with ${
+          query.initialLiquidity
+        } ETH<br>
         • Token will be immediately tradeable on Uniswap v4
       </div>
     </div>
@@ -809,24 +876,43 @@ app.post("/api/deployment-tracker/update", async (c) => {
     const body = await c.req.json();
     const { castHash, transactionHash, tokenAddress, status } = body;
 
-    console.log(`[DeploymentTracker] Update request:`, { castHash, transactionHash, status });
+    console.log(`[DeploymentTracker] Update request:`, {
+      castHash,
+      transactionHash,
+      status,
+    });
 
     // Update the deployment tracker with transaction hash
     if (transactionHash && castHash) {
       // Find the deployment by cast hash and update it
       const pendingDeployments = deploymentTracker.getPendingDeployments();
-      const deployment = pendingDeployments.find(d => d.castHash === castHash);
-      
+      const deployment = pendingDeployments.find(
+        (d) => d.castHash === castHash
+      );
+
       if (deployment) {
-        deploymentTracker.updateDeploymentTransaction(castHash, deployment.expectedSalt, transactionHash);
-        console.log(`[DeploymentTracker] Updated deployment transaction:`, { castHash, transactionHash });
+        deploymentTracker.updateDeploymentTransaction(
+          castHash,
+          deployment.expectedSalt,
+          transactionHash
+        );
+        console.log(`[DeploymentTracker] Updated deployment transaction:`, {
+          castHash,
+          transactionHash,
+        });
       }
     }
 
-    return c.json({ success: true, message: "Deployment updated successfully" });
+    return c.json({
+      success: true,
+      message: "Deployment updated successfully",
+    });
   } catch (error) {
     console.error("[DeploymentTracker] Update failed:", error);
-    return c.json({ success: false, error: "Failed to update deployment" }, 500);
+    return c.json(
+      { success: false, error: "Failed to update deployment" },
+      500
+    );
   }
 });
 
@@ -834,19 +920,19 @@ app.post("/api/deployment-tracker/update", async (c) => {
 app.get("/api/deployment-tracker/stats", (c) => {
   const stats = deploymentTracker.getStats();
   const pendingDeployments = deploymentTracker.getPendingDeployments();
-  
+
   return c.json({
     stats,
-    pendingDeployments: pendingDeployments.map(d => ({
+    pendingDeployments: pendingDeployments.map((d) => ({
       castHash: d.castHash,
       deploymentType: d.deploymentType,
       tokenName: d.expectedTokenName,
       tokenSymbol: d.expectedTokenSymbol,
       matched: d.matched,
       timestamp: d.timestamp,
-      transactionHash: d.transactionHash
+      transactionHash: d.transactionHash,
     })),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
